@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPTNeoXForCausalLM, AutoTokenizer
 
-from utils.constants import STRIDE
+from ..utils.constants import STRIDE
 
 
 class GPTBaseModel():

@@ -1,8 +1,8 @@
 import argparse
 import pandas as pd
 
-from utils import constants, utils
-from models import get_model, get_bow_symbol
+from .utils import constants, utils
+from .models import get_model, get_bow_symbol
 
 
 def get_args():
@@ -33,6 +33,7 @@ def get_surprisals_per_subword(args):
 
     return df
 
+
 def mark_bos_subwords(df):
     df['ones'] = 1
     df['text_pos'] = df.groupby('text_id')['ones'].cumsum()
@@ -48,6 +49,7 @@ def mark_eow_subwords(df):
     df.loc[df['is_eow'].isna(), 'is_eow'] = True
 
     return df
+
 
 def agg_surprisal_per_word(df, args):
     bow_symbol = get_bow_symbol(args.model)
@@ -78,6 +80,7 @@ def agg_surprisal_per_word(df, args):
     del df_per_word['offsets']
 
     return df_per_word
+
 
 def main():
     args = get_args()
