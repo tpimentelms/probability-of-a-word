@@ -1,5 +1,4 @@
 [MASTER]
-init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()));"
 
 [MESSAGES CONTROL]
 
@@ -13,7 +12,8 @@ init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.app
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=missing-docstring,
-        fixme
+        fixme,
+        too-many-locals
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -33,15 +33,11 @@ bad-names=foo,
           tata
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names=i,
+good-names=df,
+           i,
            j,
-           df,
-           m,
-           f,
            x,
-           y,
-           device,
-           ax
+           y
 
 max-args=8
 
