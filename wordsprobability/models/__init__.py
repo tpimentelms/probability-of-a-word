@@ -1,4 +1,4 @@
-from .gpt2 import \
+from .bow_lm import \
     EnglishGptSmall, EnglishGptMedium, EnglishGptLarge, EnglishGptXl, \
     EnglishPythia70M, EnglishPythia160M, EnglishPythia410M, \
     EnglishPythia14B, EnglishPythia28B, EnglishPythia69B, EnglishPythia120B
