@@ -5,8 +5,6 @@ import torch
 import torch.nn.functional as F
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPTNeoXForCausalLM, AutoTokenizer
 
-from wordsprobability.utils.constants import STRIDE
-
 
 class GPTBaseModel(ABC):
     bow_symbol = 'Ġ'
@@ -83,7 +81,7 @@ class GPTBaseModel(ABC):
     def get_predictions(self, sentence, use_bos_symbol=True):
         return self.get_models_output(sentence, use_bos_symbol=use_bos_symbol)
 
-    def get_models_output(self, sentence, use_bos_symbol=True):
+    def get_models_output(self, sentence, use_bos_symbol=True, stride=200):
         with torch.no_grad():
             all_results = {metric: torch.tensor([], device=self.device)
                            for metric in self.metrics}
@@ -104,7 +102,7 @@ class GPTBaseModel(ABC):
                 shift_logits = output['logits'][..., :-1, :].contiguous()
                 shift_labels = tensor_input[..., 1:].contiguous()
 
-                offset = 0 if start_ind == 0 else STRIDE - 1
+                offset = 0 if start_ind == 0 else stride - 1
 
                 # Get metrics needed for analysis
                 for metric, metric_fn in self.metrics.items():
@@ -115,7 +113,7 @@ class GPTBaseModel(ABC):
                                        for i, j in encodings['offset_mapping'][offset:]])
                 if encodings['offset_mapping'][-1][1] + start_ind == len(sentence):
                     break
-                start_ind += encodings['offset_mapping'][-STRIDE][1]
+                start_ind += encodings['offset_mapping'][-stride][1]
 
             all_results['eow_fix'] = np.concatenate([all_results['bow_fix'][1:], results[-1:]])
             return all_results, offset_mapping

@@ -30,7 +30,7 @@ WordsProbability has the following requirements:
 
 Install this repository. Then run:
 ```bash
-    $ wordsprobability --model pythia-70m --input examples/abstract.txt --output temp.tsv
+$ wordsprobability --model pythia-70m --input examples/abstract.txt --output temp.tsv
 ```
 
 The output will be a tsv file with a word per row with its respective computed `surprisal` and `surprisal_fixed` values.

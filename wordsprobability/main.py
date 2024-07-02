@@ -1,8 +1,8 @@
 import argparse
 import pandas as pd
 
-from .utils import constants, utils
 from .models import get_model, get_bow_symbol
+from .utils import constants, utils
 
 
 def get_args():
