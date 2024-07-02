@@ -23,4 +23,4 @@ def get_model(model_name):
     return model_cls()
 
 def get_bow_symbol(model_name):
-    return MODELS[model_name].start_of_word_symbol
+    return MODELS[model_name].bow_symbol

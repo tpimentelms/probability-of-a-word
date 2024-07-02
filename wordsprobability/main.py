@@ -28,16 +28,14 @@ def get_surprisals_per_subword(args):
         df['text_id'] = text_id
         df['offsets'] = offsets
         dfs += [df]
-    
-    df = pd.concat(dfs)
 
-    return df
+    return pd.concat(dfs)
 
 
 def mark_bos_subwords(df):
     df['ones'] = 1
     df['text_pos'] = df.groupby('text_id')['ones'].cumsum()
-    df['is_bos'] = (df['text_pos'] == 1)
+    df['is_bos'] = df['text_pos'] == 1
     del df['ones']
     del df['text_pos']
 
@@ -69,7 +67,8 @@ def agg_surprisal_per_word(df, args):
     assert ((df_per_word.is_bow + df_per_word.is_bos) == 1).all()
     assert (df_per_word.is_eow == 1).all()
 
-    df_per_word['subword'] = df_per_word.subword.apply(lambda x: x[1:] if (x[0] == bow_symbol) else x)
+    df_per_word['subword'] = df_per_word.subword.apply(
+        lambda x: x[1:] if (x[0] == bow_symbol) else x)
 
     del df_per_word['is_bow']
     del df_per_word['is_bos']
