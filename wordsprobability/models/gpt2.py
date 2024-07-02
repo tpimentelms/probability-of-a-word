@@ -32,26 +32,45 @@ class GPTBaseModel(ABC):
         vocab = self.tokenizer.get_vocab()
         n_logits = self.model.embed_out.out_features
 
+        self.vocab_masks = {}
+        self.vocab_masks['bow'] = self.get_bow_mask(vocab, n_logits)
+        self.vocab_masks['punct'] = self.get_punct_mask(vocab, n_logits)
+        self.vocab_masks['eos'] = self.get_eos_mask(n_logits)
+        self.vocab_masks['useless'] = self.get_useless_mask(n_logits)
+        self.vocab_masks['mid'] = self.get_midword_mask(n_logits, self.vocab_masks)
+
+    def get_bow_mask(self, vocab, n_logits):
         bow_subwords = set(idx for word, idx in vocab.items()
                            if word[0] == self.bow_symbol)
-        self.bow_mask = torch.zeros(n_logits)
-        self.bow_mask[torch.LongTensor(list(bow_subwords))] = 1
+        bow_mask = torch.zeros(n_logits)
+        bow_mask[torch.LongTensor(list(bow_subwords))] = 1
 
+        return bow_mask
+
+    def get_punct_mask(self, vocab, n_logits):
         start_of_punctuation = set(idx for word, idx in vocab.items()
                                    if word[0] in string.punctuation)
-        self.punct_mask = torch.zeros(n_logits)
-        self.punct_mask[torch.LongTensor(list(start_of_punctuation))] = 1
-        self.punct_mask[self.tokenizer.eos_token_id] = 0
+        punct_mask = torch.zeros(n_logits)
+        punct_mask[torch.LongTensor(list(start_of_punctuation))] = 1
+        punct_mask[self.tokenizer.eos_token_id] = 0
 
-        self.eos_mask = torch.zeros(n_logits)
-        self.eos_mask[self.tokenizer.eos_token_id] = 1
+        return punct_mask
 
-        self.useless_mask = torch.zeros(n_logits)
-        self.useless_mask[self.tokenizer.vocab_size:] = 1
+    def get_eos_mask(self, n_logits):
+        eos_mask = torch.zeros(n_logits)
+        eos_mask[self.tokenizer.eos_token_id] = 1
 
-        self.midword_mask = \
-            torch.ones(n_logits) - self.bow_mask - self.punct_mask - self.useless_mask
-        assert ((self.midword_mask == 1) | (self.midword_mask ==0)).all()
+        return eos_mask
+
+    def get_useless_mask(self, n_logits):
+        useless_mask = torch.zeros(n_logits)
+        useless_mask[self.tokenizer.vocab_size:] = 1
+        return useless_mask
+
+    def get_midword_mask(self, n_logits, vocab_masks):
+        midword_mask = torch.ones(n_logits) - vocab_masks['bow'] \
+                       - vocab_masks['punct'] - vocab_masks['useless']
+        return midword_mask
 
     def get_model(self):
         model = GPT2LMHeadModel.from_pretrained(self.model_name)
@@ -113,14 +132,15 @@ class GPTBaseModel(ABC):
         probs = F.softmax(logits, dim=-1)
         # ToDo: Should punctuation be a bow as well?
         # bow_fix = - np.log(((self.bow_mask + self.punct_mask) * probs).sum(-1))
-        bow_fix = - torch.log(((self.bow_mask + self.eos_mask) * probs).sum(-1))
+        bow_vocab = self.vocab_masks['bow'] + self.vocab_masks['eos']
+        bow_fix = - torch.log((bow_vocab * probs).sum(-1))
 
         return bow_fix.view(-1).cpu().numpy()
 
     def _get_bos_fix(self, logits, _, __, ___):
         probs = F.softmax(logits, dim=-1)
-        bos_fix = - torch.log(
-            ((self.midword_mask + self.punct_mask + self.eos_mask) * probs).sum(-1))
+        bos_vocab = self.vocab_masks['mid'] + self.vocab_masks['punct'] + self.vocab_masks['eos']
+        bos_fix = - torch.log((bos_vocab * probs).sum(-1))
 
         return bos_fix.view(-1).cpu().numpy()
 
