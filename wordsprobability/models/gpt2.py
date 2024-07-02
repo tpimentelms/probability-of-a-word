@@ -6,18 +6,20 @@ import torch.nn.functional as F
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPTNeoXForCausalLM, AutoTokenizer
 
 
-class GPTBaseModel(ABC):
+class BaseBOWModel(ABC):
     bow_symbol = 'Ġ'
+    model_cls = None
+    tokenizer_cls = None
     model_name = None
 
     def __init__(self):
-        self.model, self.tokenizer = self.get_model()
+        self.model, self.tokenizer = self._initialise_model()
 
         self.device = self.model.device
         self.bos_token_id = self.tokenizer.bos_token_id
         self.eos_token_id = self.tokenizer.eos_token_id
 
-        self.get_vocab_masks()
+        self._initialise_vocab_masks()
 
         self.metrics = {
             'surprisal': self._get_surprisal,
@@ -26,18 +28,26 @@ class GPTBaseModel(ABC):
             'bow_fix': self._get_bow_fix,
         }
 
-    def get_vocab_masks(self):
+    def _initialise_model(self):
+        model = self.model_cls.from_pretrained(self.model_name)
+        model.eval()
+        if torch.cuda.is_available():
+            model = model.cuda()
+        tokenizer = self.tokenizer_cls.from_pretrained(self.model_name)
+        return model, tokenizer
+
+    def _initialise_vocab_masks(self):
         vocab = self.tokenizer.get_vocab()
         n_logits = self.model.embed_out.out_features
 
         self.vocab_masks = {}
-        self.vocab_masks['bow'] = self.get_bow_mask(vocab, n_logits)
-        self.vocab_masks['punct'] = self.get_punct_mask(vocab, n_logits)
-        self.vocab_masks['eos'] = self.get_eos_mask(n_logits)
-        self.vocab_masks['useless'] = self.get_useless_mask(n_logits)
-        self.vocab_masks['mid'] = self.get_midword_mask(n_logits, self.vocab_masks)
+        self.vocab_masks['bow'] = self._initialise_bow_mask(vocab, n_logits)
+        self.vocab_masks['punct'] = self._initialise_punct_mask(vocab, n_logits)
+        self.vocab_masks['eos'] = self._initialise_eos_mask(n_logits)
+        self.vocab_masks['useless'] = self._initialise_useless_mask(n_logits)
+        self.vocab_masks['mid'] = self._initialise_midword_mask(n_logits, self.vocab_masks)
 
-    def get_bow_mask(self, vocab, n_logits):
+    def _initialise_bow_mask(self, vocab, n_logits):
         bow_subwords = set(idx for word, idx in vocab.items()
                            if word[0] == self.bow_symbol)
         bow_mask = torch.zeros(n_logits)
@@ -45,7 +55,7 @@ class GPTBaseModel(ABC):
 
         return bow_mask
 
-    def get_punct_mask(self, vocab, n_logits):
+    def _initialise_punct_mask(self, vocab, n_logits):
         start_of_punctuation = set(idx for word, idx in vocab.items()
                                    if word[0] in string.punctuation)
         punct_mask = torch.zeros(n_logits)
@@ -54,29 +64,21 @@ class GPTBaseModel(ABC):
 
         return punct_mask
 
-    def get_eos_mask(self, n_logits):
+    def _initialise_eos_mask(self, n_logits):
         eos_mask = torch.zeros(n_logits)
         eos_mask[self.tokenizer.eos_token_id] = 1
 
         return eos_mask
 
-    def get_useless_mask(self, n_logits):
+    def _initialise_useless_mask(self, n_logits):
         useless_mask = torch.zeros(n_logits)
         useless_mask[self.tokenizer.vocab_size:] = 1
         return useless_mask
 
-    def get_midword_mask(self, n_logits, vocab_masks):
+    def _initialise_midword_mask(self, n_logits, vocab_masks):
         midword_mask = torch.ones(n_logits) - vocab_masks['bow'] \
                        - vocab_masks['punct'] - vocab_masks['useless']
         return midword_mask
-
-    def get_model(self):
-        model = GPT2LMHeadModel.from_pretrained(self.model_name)
-        model.eval()
-        if torch.cuda.is_available():
-            model = model.cuda()
-        tokenizer = GPT2TokenizerFast.from_pretrained(self.model_name)
-        return model, tokenizer
 
     def get_predictions(self, sentence, use_bos_symbol=True):
         return self.get_models_output(sentence, use_bos_symbol=use_bos_symbol)
@@ -146,55 +148,57 @@ class GPTBaseModel(ABC):
         return np.array(self.tokenizer.convert_ids_to_tokens(tensor_input[0]))[1:]
 
 
-class EnglishGptXl(GPTBaseModel):
+class GPTBaseModel(BaseBOWModel, ABC):
     language = 'english'
+    model_cls = GPT2LMHeadModel
+    tokenizer_cls = GPT2TokenizerFast
+
+
+class EnglishGptXl(GPTBaseModel):
     model_name = 'gpt2-xl'
 
 
 class EnglishGptLarge(GPTBaseModel):
-    language = 'english'
     model_name = 'gpt2-large'
 
 
 class EnglishGptMedium(GPTBaseModel):
-    language = 'english'
     model_name = 'gpt2-medium'
 
 
 class EnglishGptSmall(GPTBaseModel):
-    language = 'english'
     model_name = 'gpt2'
 
 
-class EnglishPythiaSmall(GPTBaseModel):
+class PythiaBaseModel(BaseBOWModel, ABC):
     language = 'english'
-
-    def get_model(self):
-        model = GPTNeoXForCausalLM.from_pretrained(self.model_name)
-        model.eval()
-        if torch.cuda.is_available():
-            model = model.cuda()
-        tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        return model, tokenizer
+    model_cls = GPTNeoXForCausalLM
+    tokenizer_cls = AutoTokenizer
 
 
-class EnglishPythia70M(EnglishPythiaSmall):
+class EnglishPythia70M(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-70m'
 
-class EnglishPythia160M(EnglishPythiaSmall):
+
+class EnglishPythia160M(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-160m'
 
-class EnglishPythia410M(EnglishPythiaSmall):
+
+class EnglishPythia410M(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-410m'
 
-class EnglishPythia14B(EnglishPythiaSmall):
+
+class EnglishPythia14B(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-1.4b'
 
-class EnglishPythia28B(EnglishPythiaSmall):
+
+class EnglishPythia28B(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-2.8b'
 
-class EnglishPythia69B(EnglishPythiaSmall):
+
+class EnglishPythia69B(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-6.9b'
 
-class EnglishPythia120B(EnglishPythiaSmall):
+
+class EnglishPythia120B(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-12b'
