@@ -57,28 +57,21 @@ def agg_surprisal_per_word(df, args):
     df = mark_eow_subwords(df)
     df['word_id'] = df.groupby('text_id')['is_bow'].cumsum()
 
-    df['surprisal_fixed'] = df['surprisal'] \
-                            - df['bow_fix'] * df['is_bow'] \
-                            - df['bos_fix'] * df['is_bos'] \
-                            + df['eow_fix'] * df['is_eow']
+    df['surprisal_buggy'] = df['surprisal']
+    df['surprisal'] = df['surprisal'] \
+                      - df['bow_fix'] * df['is_bow'] \
+                      - df['bos_fix'] * df['is_bos'] \
+                      + df['eow_fix'] * df['is_eow']
 
     df_per_word = df.groupby(['text_id', 'word_id']).agg('sum')
 
     assert ((df_per_word.is_bow + df_per_word.is_bos) == 1).all()
     assert (df_per_word.is_eow == 1).all()
 
-    df_per_word['subword'] = df_per_word.subword.apply(
+    df_per_word['word'] = df_per_word.subword.apply(
         lambda x: x[1:] if (x[0] == bow_symbol) else x)
 
-    del df_per_word['is_bow']
-    del df_per_word['is_bos']
-    del df_per_word['is_eow']
-    del df_per_word['bow_fix']
-    del df_per_word['bos_fix']
-    del df_per_word['eow_fix']
-    del df_per_word['offsets']
-
-    return df_per_word
+    return df_per_word[['word', 'surprisal', 'surprisal_buggy']]
 
 
 def main():
