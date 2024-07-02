@@ -1,4 +1,7 @@
 # probability-of-a-word
+
+[![CircleCI](https://circleci.com/gh/tpimentelms/probability-of-a-word.svg?style=svg)](https://circleci.com/gh/tpimentelms/probability-of-a-word)
+
 Code to compute a word's probability using the fixes from "How to Compute the Probability of a Word"
 
 
