@@ -34,6 +34,7 @@ bad-names=foo,
 
 # Good variable names which should always be accepted, separated by a comma.
 good-names=df,
+           f,
            i,
            j,
            x,
