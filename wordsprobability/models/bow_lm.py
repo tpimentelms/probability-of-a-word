@@ -38,7 +38,7 @@ class BaseBOWModel(ABC):
 
     def _initialise_vocab_masks(self):
         vocab = self.tokenizer.get_vocab()
-        n_logits = self.model.embed_out.out_features
+        n_logits = self._get_n_logits()
 
         self.vocab_masks = {}
         self.vocab_masks['bow'] = self._initialise_bow_mask(vocab, n_logits)
@@ -153,6 +153,9 @@ class GPTBaseModel(BaseBOWModel, ABC):
     model_cls = GPT2LMHeadModel
     tokenizer_cls = GPT2TokenizerFast
 
+    def _get_n_logits(self):
+        return self.model.lm_head.out_features
+
 
 class EnglishGptXl(GPTBaseModel):
     model_name = 'gpt2-xl'
@@ -174,6 +177,9 @@ class PythiaBaseModel(BaseBOWModel, ABC):
     language = 'english'
     model_cls = GPTNeoXForCausalLM
     tokenizer_cls = AutoTokenizer
+
+    def _get_n_logits(self):
+        return self.model.embed_out.out_features
 
 
 class EnglishPythia70M(PythiaBaseModel):
