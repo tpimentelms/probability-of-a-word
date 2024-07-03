@@ -1,5 +1,5 @@
 import string
-from abc import ABC
+from abc import ABC, abstractmethod
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -46,6 +46,10 @@ class BaseBOWModel(ABC):
         self.vocab_masks['eos'] = self._initialise_eos_mask(n_logits)
         self.vocab_masks['useless'] = self._initialise_useless_mask(n_logits)
         self.vocab_masks['mid'] = self._initialise_midword_mask(n_logits, self.vocab_masks)
+
+    @abstractmethod
+    def _get_n_logits(self):
+        raise NotImplementedError
 
     def _initialise_bow_mask(self, vocab, n_logits):
         bow_subwords = set(idx for word, idx in vocab.items()
