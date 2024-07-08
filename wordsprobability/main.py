@@ -1,4 +1,5 @@
 import argparse
+from typing import List
 import pandas as pd
 
 from .models import get_model, get_bow_symbol
@@ -16,11 +17,10 @@ def get_args():
     return parser.parse_args()
 
 
-def get_surprisals_per_subword(args):
-    text = utils.read_txt(args.input)
+def get_surprisals_per_subword(text, model_name):
     dfs = []
 
-    model = get_model(args.model)
+    model = get_model(model_name)
     for text_id, utterance in enumerate(text):
         results, offsets = model.get_predictions(utterance.strip())
 
@@ -49,8 +49,8 @@ def mark_eow_subwords(df):
     return df
 
 
-def agg_surprisal_per_word(df, args):
-    bow_symbol = get_bow_symbol(args.model)
+def agg_surprisal_per_word(df, model_name):
+    bow_symbol = get_bow_symbol(model_name)
 
     df['is_bow'] = df.subword.apply(lambda x: x[0] == bow_symbol)
     df = mark_bos_subwords(df)
@@ -74,10 +74,21 @@ def agg_surprisal_per_word(df, args):
     return df_per_word[['word', 'surprisal', 'surprisal_buggy']]
 
 
+def _get_surprisal_per_word(text_list: List[str], model_name: str) -> pd.DataFrame:
+    df = get_surprisals_per_subword(text_list, model_name)
+    return agg_surprisal_per_word(df, model_name)
+
+
+def get_surprisal_per_word(text: str, model_name: str) -> pd.DataFrame:
+    text_list = text.split('\n')
+    return _get_surprisal_per_word(text_list, model_name)
+
+
 def main():
     args = get_args()
-    df = get_surprisals_per_subword(args)
-    df = agg_surprisal_per_word(df, args)
+
+    text = utils.read_txt(args.input)
+    df = _get_surprisal_per_word(text, args.model)
     utils.write_tsv(df, args.output)
 
 
