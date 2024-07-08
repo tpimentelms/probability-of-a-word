@@ -36,8 +36,18 @@ Install this repository. Then run:
 $ wordsprobability --model pythia-70m --input examples/abstract.txt --output temp.tsv
 ```
 
+The input must be a txt file, with one sequence per line.
 The output will be a tsv file with a word per row with its respective computed `surprisal` and `surprisal_fixed` values.
 Currently, supported models are: `pythia-70m`, `pythia-160m`, `pythia-410m`, `pythia-14b`, `pythia-28b`, `pythia-69b`, `pythia-120b`, `gpt-small`, `gpt-medium`, `gpt-large`, `gpt-xl`.
+
+#### Using in other Applications
+
+Import wordsprobability in your application and get surprisals with:
+```python
+    from wordsprobability import get_surprisal_per_word
+    df = get_surprisal_per_word(text='Hello world! Who are you???\nWho am I?', model_name='pythia-70m')
+```
+
 
 ## Extra Information
 
