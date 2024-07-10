@@ -51,7 +51,8 @@ def mark_eow_subwords(df):
     return df
 
 
-def agg_surprisal_per_word(df: pd.DataFrame, model_name: str, return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
+def agg_surprisal_per_word(df: pd.DataFrame, model_name: str,
+                           return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
     bow_symbol = get_bow_symbol(model_name)
 
     df['is_bow'] = df.subword.apply(lambda x: x[0] == bow_symbol)
@@ -73,16 +74,19 @@ def agg_surprisal_per_word(df: pd.DataFrame, model_name: str, return_buggy_surpr
     df_per_word['word'] = df_per_word.subword.apply(
         lambda x: x[1:] if (x[0] == bow_symbol) else x)
 
-    return_columns = ['word', 'surprisal', 'surprisal_buggy'] if return_buggy_surprisals else ['word', 'surprisal']
+    return_columns = ['word', 'surprisal', 'surprisal_buggy'] \
+        if return_buggy_surprisals else ['word', 'surprisal']
     return df_per_word[return_columns]
 
 
-def _get_surprisal_per_word(text_list: List[str], model_name: str, return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
+def _get_surprisal_per_word(text_list: List[str], model_name: str,
+                            return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
     df = get_surprisals_per_subword(text_list, model_name)
     return agg_surprisal_per_word(df, model_name, return_buggy_surprisals)
 
 
-def get_surprisal_per_word(text: str, model_name: str, return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
+def get_surprisal_per_word(text: str, model_name: str,
+                           return_buggy_surprisals: Optional[bool] = False) -> pd.DataFrame:
     text_list = text.split('\n')
     return _get_surprisal_per_word(text_list, model_name, return_buggy_surprisals)
 
@@ -91,7 +95,8 @@ def main():
     args = get_args()
 
     text = utils.read_txt(args.input)
-    df = _get_surprisal_per_word(text, args.model, return_buggy_surprisals=args.return_buggy_surprisals)
+    df = _get_surprisal_per_word(text, args.model,
+                                 return_buggy_surprisals=args.return_buggy_surprisals)
     utils.write_tsv(df, args.output)
 
 
