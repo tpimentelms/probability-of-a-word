@@ -38,7 +38,7 @@ $ wordsprobability --model pythia-70m --input examples/abstract.txt --output tem
 
 The input must be a txt file, with one sequence per line.
 The output will be a tsv file with a word per row with its respective computed `surprisal` and `surprisal_fixed` values.
-Currently, supported models are: `pythia-70m`, `pythia-160m`, `pythia-410m`, `pythia-14b`, `pythia-28b`, `pythia-69b`, `pythia-120b`, `gpt-small`, `gpt-medium`, `gpt-large`, `gpt-xl`.
+Currently, supported models are: `pythia-70m`, `pythia-160m`, `pythia-410m`, `pythia-14b`, `pythia-28b`, `pythia-69b`, `pythia-120b`, `gpt2-small`, `gpt2-medium`, `gpt2-large`, `gpt2-xl`.
 
 #### Using in other Applications
 

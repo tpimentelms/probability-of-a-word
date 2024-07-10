@@ -1,13 +1,13 @@
 from .bow_lm import \
-    EnglishGptSmall, EnglishGptMedium, EnglishGptLarge, EnglishGptXl, \
+    EnglishGpt2Small, EnglishGpt2Medium, EnglishGpt2Large, EnglishGpt2Xl, \
     EnglishPythia70M, EnglishPythia160M, EnglishPythia410M, \
     EnglishPythia14B, EnglishPythia28B, EnglishPythia69B, EnglishPythia120B
 
 MODELS = {
-    "gpt-small": EnglishGptSmall,
-    "gpt-medium": EnglishGptMedium,
-    "gpt-large": EnglishGptLarge,
-    "gpt-xl": EnglishGptXl,
+    "gpt2-small": EnglishGpt2Small,
+    "gpt2-medium": EnglishGpt2Medium,
+    "gpt2-large": EnglishGpt2Large,
+    "gpt2-xl": EnglishGpt2Xl,
     "pythia-70m": EnglishPythia70M,
     "pythia-160m": EnglishPythia160M,
     "pythia-410m": EnglishPythia410M,
