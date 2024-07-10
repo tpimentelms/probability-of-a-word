@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='wordsprobability',
-      version='0.16',
+      version='0.17',
       description='Method to get a words probability with fixes from How to Compute the Probability of a Word.',
       long_description=readme(),
       long_description_content_type="text/markdown",
