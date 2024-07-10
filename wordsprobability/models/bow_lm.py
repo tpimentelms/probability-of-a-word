@@ -152,7 +152,7 @@ class BaseBOWModel(ABC):
         return np.array(self.tokenizer.convert_ids_to_tokens(tensor_input[0]))[1:]
 
 
-class GPTBaseModel(BaseBOWModel, ABC):
+class GPT2BaseModel(BaseBOWModel, ABC):
     language = 'english'
     model_cls = GPT2LMHeadModel
     tokenizer_cls = GPT2TokenizerFast
@@ -161,19 +161,19 @@ class GPTBaseModel(BaseBOWModel, ABC):
         return self.model.lm_head.out_features
 
 
-class EnglishGptXl(GPTBaseModel):
+class EnglishGpt2Xl(GPT2BaseModel):
     model_name = 'gpt2-xl'
 
 
-class EnglishGptLarge(GPTBaseModel):
+class EnglishGpt2Large(GPT2BaseModel):
     model_name = 'gpt2-large'
 
 
-class EnglishGptMedium(GPTBaseModel):
+class EnglishGpt2Medium(GPT2BaseModel):
     model_name = 'gpt2-medium'
 
 
-class EnglishGptSmall(GPTBaseModel):
+class EnglishGpt2Small(GPT2BaseModel):
     model_name = 'gpt2'
 
 
