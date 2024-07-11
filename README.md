@@ -40,7 +40,6 @@ The input must be a txt file, with one sequence per line.
 The output will be a tsv file with a word per row with its respective computed `surprisal` values.
 To also get computed `surprisal_buggy` values (without our paper's correction) use the optional flag `--return-buggy-surprisals`.
 Currently, supported models are: `pythia-70m`, `pythia-160m`, `pythia-410m`, `pythia-14b`, `pythia-28b`, `pythia-69b`, `pythia-120b`, `gpt2-small`, `gpt2-medium`, `gpt2-large`, `gpt2-xl`.
-The code
 
 #### Using in other Applications
 
