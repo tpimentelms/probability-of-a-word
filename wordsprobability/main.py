@@ -24,7 +24,7 @@ def get_surprisals_per_subword(text, model_name):
     dfs = []
 
     model = get_model(model_name)
-    for text_id, utterance in tqdm(enumerate(text), total=len(text), 
+    for text_id, utterance in tqdm(enumerate(text), total=len(text),
                                    desc='Getting Surprisals'):
         results, offsets = model.get_predictions(utterance.strip())
 
