@@ -1,6 +1,7 @@
 import argparse
 from typing import List, Optional
 import pandas as pd
+from tqdm import tqdm
 
 from .models import get_model, get_bow_symbol
 from .utils import constants, utils
@@ -23,7 +24,8 @@ def get_surprisals_per_subword(text, model_name):
     dfs = []
 
     model = get_model(model_name)
-    for text_id, utterance in enumerate(text):
+    for text_id, utterance in tqdm(enumerate(text), total=len(text),
+                                   desc='Getting Surprisals'):
         results, offsets = model.get_predictions(utterance.strip())
 
         df = pd.DataFrame(results)

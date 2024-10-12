@@ -33,6 +33,8 @@ class BaseBOWModel(ABC):
         model.eval()
         if torch.cuda.is_available():
             model = model.cuda()
+        elif torch.backends.mps.is_available():
+            model.to('mps')
         tokenizer = self.tokenizer_cls.from_pretrained(self.model_name)
         return model, tokenizer
 
@@ -54,7 +56,7 @@ class BaseBOWModel(ABC):
     def _initialise_bow_mask(self, vocab, n_logits):
         bow_subwords = set(idx for word, idx in vocab.items()
                            if word[0] == self.bow_symbol)
-        bow_mask = torch.zeros(n_logits)
+        bow_mask = torch.zeros(n_logits, device=self.device)
         bow_mask[torch.LongTensor(list(bow_subwords))] = 1
 
         return bow_mask
@@ -62,25 +64,25 @@ class BaseBOWModel(ABC):
     def _initialise_punct_mask(self, vocab, n_logits):
         start_of_punctuation = set(idx for word, idx in vocab.items()
                                    if word[0] in string.punctuation)
-        punct_mask = torch.zeros(n_logits)
+        punct_mask = torch.zeros(n_logits, device=self.device)
         punct_mask[torch.LongTensor(list(start_of_punctuation))] = 1
         punct_mask[self.tokenizer.eos_token_id] = 0
 
         return punct_mask
 
     def _initialise_eos_mask(self, n_logits):
-        eos_mask = torch.zeros(n_logits)
+        eos_mask = torch.zeros(n_logits, device=self.device)
         eos_mask[self.tokenizer.eos_token_id] = 1
 
         return eos_mask
 
     def _initialise_useless_mask(self, n_logits):
-        useless_mask = torch.zeros(n_logits)
+        useless_mask = torch.zeros(n_logits, device=self.device)
         useless_mask[self.tokenizer.vocab_size:] = 1
         return useless_mask
 
     def _initialise_midword_mask(self, n_logits, vocab_masks):
-        midword_mask = torch.ones(n_logits) - vocab_masks['bow'] \
+        midword_mask = torch.ones(n_logits, device=self.device) - vocab_masks['bow'] \
                        - vocab_masks['punct'] - vocab_masks['useless']
         return midword_mask
 
@@ -89,7 +91,7 @@ class BaseBOWModel(ABC):
 
     def get_models_output(self, sentence, use_bos_symbol=True, stride=200):
         with torch.no_grad():
-            all_results = {metric: torch.tensor([], device=self.device)
+            all_results = {metric: torch.tensor([], device='cpu')
                            for metric in self.metrics}
             offset_mapping = []
             start_ind = 0
