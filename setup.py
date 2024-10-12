@@ -25,5 +25,6 @@ setup(name='wordsprobability',
           'torch',
           'transformers',
           'pandas',
+          'tqdm',
       ],
       zip_safe=False)

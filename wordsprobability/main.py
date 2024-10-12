@@ -1,6 +1,7 @@
 import argparse
 from typing import List, Optional
 import pandas as pd
+from tqdm import tqdm
 
 from .models import get_model, get_bow_symbol
 from .utils import constants, utils
@@ -23,7 +24,8 @@ def get_surprisals_per_subword(text, model_name):
     dfs = []
 
     model = get_model(model_name)
-    for text_id, utterance in enumerate(text):
+    for text_id, utterance in tqdm(enumerate(text), total=len(text),
+                                   desc='Getting Surprisals'):
         results, offsets = model.get_predictions(utterance.strip())
 
         df = pd.DataFrame(results)
@@ -71,8 +73,10 @@ def agg_surprisal_per_word(df: pd.DataFrame, model_name: str,
     assert ((df_per_word.is_bow + df_per_word.is_bos) == 1).all()
     assert (df_per_word.is_eow == 1).all()
 
-    df_per_word['word'] = df_per_word.subword.apply(
+    df_per_word['word_bytes'] = df_per_word.subword.apply(
         lambda x: x[1:] if (x[0] == bow_symbol) else x)
+    df_per_word['word'] = df_per_word.subword_clean.apply(
+        lambda x: x.strip())
 
     return_columns = ['word', 'surprisal', 'surprisal_buggy'] \
         if return_buggy_surprisals else ['word', 'surprisal']
