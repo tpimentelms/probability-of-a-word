@@ -1,7 +1,7 @@
 from .bow_lm import \
     EnglishGpt2Small, EnglishGpt2Medium, EnglishGpt2Large, EnglishGpt2Xl, \
     EnglishPythia70M, EnglishPythia160M, EnglishPythia410M, \
-    EnglishPythia14B, EnglishPythia28B, EnglishPythia69B, EnglishPythia120B
+    EnglishPythia14B, EnglishPythia28B, EnglishPythia69B, EnglishPythia120B, mGPT
 
 MODELS = {
     "gpt2-small": EnglishGpt2Small,
@@ -15,6 +15,7 @@ MODELS = {
     "pythia-28b": EnglishPythia28B,
     "pythia-69b": EnglishPythia69B,
     "pythia-120b": EnglishPythia120B,
+    "mgpt": mGPT,
 }
 
 

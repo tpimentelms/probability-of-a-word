@@ -24,6 +24,7 @@ class BaseBOWModel(ABC):
         self.metrics = {
             'surprisal': self._get_surprisal,
             'subword': self._get_tokens,
+            'subword_clean': self._get_tokens_clean,
             'bos_fix': self._get_bos_fix,
             'bow_fix': self._get_bow_fix,
         }
@@ -153,6 +154,14 @@ class BaseBOWModel(ABC):
     def _get_tokens(self, _, __, ___, tensor_input):
         return np.array(self.tokenizer.convert_ids_to_tokens(tensor_input[0]))[1:]
 
+    def _get_tokens_clean(self, _, __, ___, tensor_input):
+        tokens = self._get_tokens(_, __, ___, tensor_input)
+        # np.array(self.tokenizer.convert_tokens_to_string(token) for token in tokens)
+        # la = np.array([self.tokenizer.convert_tokens_to_string([token]) for token in tokens])
+        # import ipdb; ipdb.set_trace()
+        return np.array([self.tokenizer.convert_tokens_to_string([token]) for token in tokens])
+        # return np.array(self.tokenizer.convert_ids_to_tokens(tensor_input[0]))[1:]
+
 
 class GPT2BaseModel(BaseBOWModel, ABC):
     language = 'english'
@@ -214,3 +223,11 @@ class EnglishPythia69B(PythiaBaseModel):
 
 class EnglishPythia120B(PythiaBaseModel):
     model_name = 'EleutherAI/pythia-12b'
+
+
+class mGPT(GPT2BaseModel):
+    language = 'multilingual'
+    model_name = 'ai-forever/mGPT'
+
+    def _get_n_logits(self):
+        return self.model.lm_head.out_features
