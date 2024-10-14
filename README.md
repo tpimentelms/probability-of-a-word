@@ -56,7 +56,7 @@ Import wordsprobability in your application and get surprisals with:
 
 #### Citation
 
-If this code or the paper were usefull to you, consider citing it:
+If this code or the paper were useful to you, consider citing it:
 
 
 ```bibtex
