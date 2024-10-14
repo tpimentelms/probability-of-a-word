@@ -4,6 +4,8 @@
 
 Code to compute a word's probability using the fixes from "How to Compute the Probability of a Word"
 
+For the code to reproduce our paper's experiments, see [this repository](https://github.com/tpimentelms/probability-of-a-word-experiments).
+
 
 ### Installation
 
@@ -58,16 +60,15 @@ If this code or the paper were usefull to you, consider citing it:
 
 
 ```bibtex
-@article{pimentel-etal-2024-howto,
+@inproceedings{pimentel-etal-2024-howto,
     title = "How to Compute the Probability of a Word",
     author = "Pimentel, Tiago and
     Meister, Clara",
     year = "2024",
-    eprint = {2406.14561},
-    archivePrefix = {arXiv},
-    primaryClass = {cs.CL},
     url = {https://arxiv.org/abs/2406.14561},
-    journal = "arXiv preprint arXiv:2406.14561",
+    booktitle = {Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
+    publisher = {Association for Computational Linguistics},
+    address = {Miami, Florida, USA},
 }
 ```
 
